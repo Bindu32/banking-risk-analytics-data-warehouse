@@ -163,3 +163,353 @@ bank-risk-data-warehouse/
 - Draw arrows for all foreign keys
 - Save diagram as diagrams/erd.png
 
+ Monitor portfolio-level credit risk indicators
+
+---
+
+## Dataset
+
+This project uses the **LendingClub Loan Dataset**, a widely used dataset for credit risk analytics.
+
+Dataset source:
+https://www.kaggle.com/datasets/wordsforthewise/lending-club
+
+Due to GitHub file size limits, the repository includes **sample datasets** to reproduce the analysis pipeline.
+
+| Dataset                     | Description                         |
+| --------------------------- | ----------------------------------- |
+| lendingclub_raw_sample.csv  | Sample of the original raw dataset  |
+| customers_sample.csv        | Customer dimension table            |
+| credit_profiles_sample.csv  | Credit attributes and segmentation  |
+| loans_sample.csv            | Loan transaction records            |
+| loan_performance_sample.csv | Loan outcome and default indicators |
+
+The full dataset contains **~2.2 million loan records** and was used during analysis.
+
+---
+
+## Project Architecture
+
+The analytics pipeline follows a simplified **data warehouse workflow**.
+
+Raw Data
+→ Data Cleaning
+→ Feature Engineering
+→ Analytical Data Model
+→ SQL Risk Analytics
+→ Dashboard Reporting
+
+The architecture diagram can be found in:
+
+```
+docs/project_architecture.png
+```
+
+---
+
+## Data Modeling (Star Schema)
+
+To enable efficient analytics, the dataset is modeled using a **Star Schema**.
+
+The central **Fact Table** contains loan transactions, while surrounding **Dimension Tables** provide borrower and credit attributes.
+
+### Fact Table
+
+**loans**
+
+Contains the core lending transactions.
+
+Key columns:
+
+* loan_id
+* customer_id
+* loan_amnt
+* grade
+* issue_d
+
+---
+
+### Dimension Tables
+
+**customers**
+
+Borrower demographic attributes.
+
+Columns:
+
+* customer_id
+* addr_state
+* annual_inc
+* home_ownership
+
+---
+
+**credit_profiles**
+
+Borrower credit quality segmentation.
+
+Columns:
+
+* customer_id
+* fico_score
+* credit_band
+
+Credit band segmentation:
+
+| Credit Band | Description              |
+| ----------- | ------------------------ |
+| Super Prime | Excellent credit quality |
+| Prime       | Strong credit quality    |
+| Near Prime  | Moderate credit risk     |
+| Subprime    | High credit risk         |
+
+---
+
+**loan_performance**
+
+Loan repayment outcome.
+
+Columns:
+
+* loan_id
+* loan_status
+* default_flag
+
+---
+
+### Schema Diagram
+
+The analytical data model is illustrated in:
+
+```
+docs/data_model.png
+```
+
+This schema enables efficient risk analytics using SQL and BI tools.
+
+---
+
+## SQL Risk Analytics
+
+Several SQL queries were used to analyze portfolio risk and lending patterns.
+
+Query files are available in the `sql/` directory.
+
+### Portfolio Overview
+
+Measures the overall portfolio size and default rate.
+
+Key metrics:
+
+* Total customers
+* Total loans
+* Total lending exposure
+* Portfolio default rate
+
+---
+
+### Credit Band Risk Analysis
+
+Evaluates default rates across borrower credit segments.
+
+Insights:
+
+* Subprime borrowers show the highest risk
+* Super Prime borrowers have the lowest default probability
+
+---
+
+### Geographic Risk Analysis
+
+Identifies states with elevated loan default rates.
+
+States with small loan volumes were filtered to avoid misleading statistics.
+
+---
+
+### Risk by Loan Grade
+
+Analyzes default risk across LendingClub loan grades (A–G).
+
+Higher grades generally correspond to higher default probabilities.
+
+---
+
+### Credit Band vs Loan Grade Risk
+
+Combines borrower credit quality and loan grade to detect high-risk portfolio segments.
+
+---
+
+### Portfolio Growth Trend
+
+Analyzes lending volume growth over time.
+
+---
+
+### Default Rate Trend
+
+Tracks how loan default rates evolve across different lending years.
+
+---
+
+## Dashboard (Power BI)
+
+An interactive dashboard was built using **Microsoft Power BI** to visualize portfolio risk metrics.
+
+Dashboard features include:
+
+### Portfolio KPIs
+
+* Total Customers
+* Total Loans
+* Total Lending Exposure
+* Portfolio Default Rate
+* High Risk Share
+
+---
+
+### Credit Risk Analysis
+
+Visualizations include:
+
+* Default Rate by Credit Band
+* Default Rate by Loan Grade
+
+These help identify borrower segments contributing most to portfolio risk.
+
+---
+
+### Geographic Risk Distribution
+
+State-level visualization showing regions with higher default rates.
+
+---
+
+### Portfolio Growth Monitoring
+
+Line charts showing:
+
+* Lending growth by year
+* Default rate trends over time
+
+---
+
+### Dashboard Preview
+
+A preview of the dashboard is available in:
+
+```
+dashboard/dashboard_preview.png
+```
+
+The full dashboard file can be found here:
+
+```
+dashboard/banking_risk_dashboard.pbix
+```
+
+---
+
+## Key Insights
+
+Key findings from the analysis include:
+
+* Lending volume increased significantly after 2012.
+* Higher loan grades (D–G) exhibit significantly higher default rates.
+* Borrowers in lower credit bands show elevated credit risk.
+* Certain geographic regions show consistently higher default probabilities.
+* Portfolio risk varies substantially across borrower credit segments.
+
+These insights demonstrate how credit analytics can be used to monitor and manage lending risk.
+
+---
+
+## Repository Structure
+
+```
+banking-risk-analytics-system
+│
+├── README.md
+│
+├── data
+│   ├── raw
+│   │   └── lendingclub_raw_sample.csv
+│   │
+│   └── processed
+│       ├── customers_sample.csv
+│       ├── credit_profiles_sample.csv
+│       ├── loans_sample.csv
+│       └── loan_performance_sample.csv
+│
+├── notebooks
+│   └── banking_risk_analytics_pipeline.ipynb
+│
+├── sql
+│   ├── portfolio_overview.sql
+│   ├── credit_band_risk.sql
+│   ├── geographic_risk.sql
+│   ├── risk_by_grade.sql
+│   ├── credit_grade_risk.sql
+│   ├── portfolio_trend.sql
+│   └── default_trend.sql
+│
+├── dashboard
+│   ├── banking_risk_dashboard.pbix
+│   └── dashboard_preview.png
+│
+└── docs
+    ├── data_model.png
+    └── project_architecture.png
+```
+
+---
+
+## Technologies Used
+
+* Python
+* Pandas
+* SQL
+* DuckDB
+* Power BI
+* Jupyter Notebook
+
+---
+
+## How to Reproduce the Project
+
+1. Clone the repository
+
+```
+git clone <repository-url>
+```
+
+2. Open the notebook
+
+```
+notebooks/banking_risk_analytics_pipeline.ipynb
+```
+
+3. Run the notebook cells to reproduce the data preparation and analysis.
+
+4. Open the Power BI dashboard file to explore interactive visualizations.
+
+---
+
+## Future Improvements
+
+Potential extensions for this project include:
+
+* Predictive modeling for loan default prediction
+* Expected loss estimation
+* Credit risk scoring models
+* Automated ETL pipeline implementation
+* Deployment as a data analytics application
+
+---
+
+## Author
+
+Bindu Sri Majji
+Final Year Computer Science Student
+Aspiring Data Analyst / Data Scientist
